@@ -62,6 +62,119 @@
 <div class="wrapper">
   <div class="header">
     <div>
+      <div class="header-logo">SCP RP FR</div>
+      <div class="header-sub">PORTAIL AGENT — SERVEUR ROLEPLAY FRANÇAIS</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">⏻ Déconnexion</button>
+  </div>
+
+  <div class="welcome-box">
+    <div class="welcome-title">BIENVENUE, <span id="user-pseudo">AGENT</span></div>
+    <div class="welcome-email" id="user-email">Chargement...</div>
+    <div class="welcome-badge">NIVEAU D'HABILITATION : CONFIDENTIEL</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-dot"></div>
+      <div class="card-label">Statut du compte</div>
+      <div class="card-value" style="font-size:20px;letter-spacing:2px;">ACTIF</div>
+      <div class="card-desc">Authentification réussie</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Niveau d'accès</div>
+      <div class="card-value">02</div>
+      <div class="card-desc">Clearance standard</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Site actif</div>
+      <div class="card-value" style="font-size:20px;">SCP RP FR</div>
+      <div class="card-desc">Serveur Roleplay Français</div>
+    </div>
+  </div>
+
+  <div class="log-box">
+    <div class="log-title">Journal d'activité</div>
+    <div class="log-entry">
+      <span class="log-time" id="login-time">--:--:--</span>
+      <span class="log-ok">✓ Connexion réussie — session initiée</span>
+    </div>
+    <div class="log-entry">
+      <span class="log-time">SYSTÈME</span>
+      <span>Profil agent chargé depuis JSONBin</span>
+    </div>
+    <div class="log-entry">
+      <span class="log-time">SYSTÈME</span>
+      <span class="log-warn">⚠ Rappel : Ne pas divulguer les informations de niveau 3+</span>
+    </div>
+    <div class="log-entry">
+      <span class="log-time">AUTO</span>
+      <span>Session sauvegardée — reconnexion automatique activée</span>
+    </div>
+  </div>
+
+  <div class="status-footer">
+    <span><span class="dot"></span>SYSTÈME EN LIGNE</span>
+    <span id="current-time">--</span>
+    <span>SESSION CHIFFRÉE</span>
+  </div>
+</div>
+
+<script>
+  // Vérifier si connecté
+  const userData = localStorage.getItem('scp_user');
+  if (!userData) {
+    window.location.href = 'index.html';
+  } else {
+    const user = JSON.parse(userData);
+    document.getElementById('user-pseudo').textContent = (user.pseudo || 'AGENT').toUpperCase();
+    document.getElementById('user-email').textContent = 'Email : ' + user.email;
+  }
+
+  function logout() {
+    localStorage.removeItem('scp_user');
+    window.location.href = 'index.html';
+  }
+
+  function updateTime() {
+    const now = new Date();
+    const t = now.toLocaleTimeString('fr-FR');
+    document.getElementById('current-time').textContent = t;
+    document.getElementById('login-time').textContent = t;
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+</script>
+</body>
+</html>
+    .welcome-email { font-size:11px; color:#557755; margin-top:6px; letter-spacing:1px; }
+    .welcome-badge { display:inline-block; margin-top:10px; padding:3px 10px; border:1px solid #2a5a2a; font-size:9px; letter-spacing:2px; color:var(--green-dim); }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-bottom:24px; }
+    .card { background:var(--bg2); border:1px solid var(--border); padding:20px 22px; position:relative; transition:border-color 0.2s; }
+    .card:hover { border-color:#2a5a2a; }
+    .card-label { font-size:9px; letter-spacing:3px; color:#446644; text-transform:uppercase; margin-bottom:10px; }
+    .card-value { font-family:var(--title); font-size:32px; font-weight:700; color:var(--green); line-height:1; }
+    .card-desc { font-size:11px; color:#446644; margin-top:6px; }
+    .card-dot { position:absolute; top:16px; right:16px; width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .log-box { background:var(--bg2); border:1px solid var(--border); padding:20px 24px; }
+    .log-title { font-size:10px; letter-spacing:3px; color:#446644; text-transform:uppercase; margin-bottom:16px; }
+    .log-entry { font-size:11px; color:#557755; padding:7px 0; border-bottom:1px solid #0d1f0d; display:flex; gap:12px; }
+    .log-entry:last-child { border-bottom:none; }
+    .log-time { color:#2a5a2a; white-space:nowrap; }
+    .log-ok { color:var(--green-dim); }
+    .log-warn { color:#aa8800; }
+
+    .status-footer { margin-top:20px; display:flex; justify-content:space-between; font-size:9px; color:#1a3a1a; letter-spacing:1px; border-top:1px solid #0d1f0d; padding-top:14px; }
+    .dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); margin-right:5px; animation:pulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div>
       <div class="header-logo">SCP FOUNDATION</div>
       <div class="header-sub">PORTAIL AGENT — ACCÈS NIVEAU 2</div>
     </div>
