@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SCP RP FR — Accueil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #00ff88; --green-dim: #00cc66; --bg: #050a05; --bg2: #0a110a;
+      --border: #1a3a1a; --text: #c8e6c8; --red: #ff3344;
+      --mono: 'Share Tech Mono', monospace; --title: 'Rajdhani', sans-serif;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:var(--bg); color:var(--text); font-family:var(--mono); min-height:100vh; position:relative; overflow-x:hidden; }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.012) 2px,rgba(0,255,136,0.012) 4px);
+      pointer-events:none; z-index:100;
+    }
+    body::after {
+      content:''; position:fixed; inset:0;
+      background-image:linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+      background-size:40px 40px; pointer-events:none; z-index:0;
+    }
+
+    /* HEADER */
+    .header {
+      position:relative; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid var(--border);
+    }
+    .header-logo { font-family:var(--title); font-size:18px; font-weight:700; letter-spacing:5px; color:var(--green); text-shadow:0 0 12px rgba(0,255,136,0.4); }
+    .header-right { display:flex; align-items:center; gap:12px; }
+    .pseudo-badge { font-size:10px; color:var(--green-dim); letter-spacing:1px; border:1px solid #1a3a1a; padding:4px 10px; }
+    .btn-logout { background:transparent; border:1px solid #1a3a1a; color:#446644; font-family:var(--mono); font-size:10px; letter-spacing:1px; padding:5px 10px; cursor:pointer; transition:all 0.2s; }
+    .btn-logout:hover { border-color:var(--red); color:var(--red); }
+
+    /* HERO */
+    .hero {
+      position:relative; z-index:10;
+      text-align:center; padding:50px 20px 40px;
+      border-bottom:1px solid var(--border);
+    }
+    .hero-logo { width:100px; height:100px; margin:0 auto 20px; }
+    .hero-logo svg { width:100%; height:100%; filter:drop-shadow(0 0 20px var(--green)); animation:spin 25s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .hero-title { font-family:var(--title); font-size:36px; font-weight:700; letter-spacing:8px; color:var(--green); text-shadow:0 0 30px rgba(0,255,136,0.4); line-height:1.1; }
+    .hero-sub { font-size:11px; letter-spacing:4px; color:#446644; margin-top:10px; text-transform:uppercase; }
+    .hero-welcome { margin-top:20px; font-size:13px; color:var(--text); letter-spacing:1px; }
+    .hero-welcome span { color:var(--green); font-family:var(--title); font-size:16px; }
+
+    /* ALERT */
+    .alert {
+      position:relative; z-index:10;
+      margin:20px; padding:12px 16px;
+      border:1px solid #3a2200; border-left:3px solid #ff9900;
+      background:rgba(255,153,0,0.05); font-size:11px; color:#aa7700; letter-spacing:1px;
+    }
+
+    /* CARDS GRID */
+    .section { position:relative; z-index:10; padding:20px; }
+    .section-title { font-size:9px; letter-spacing:3px; color:#446644; text-transform:uppercase; margin-bottom:14px; border-bottom:1px solid #0d1f0d; padding-bottom:8px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+
+    .card {
+      background:var(--bg2); border:1px solid var(--border); padding:16px;
+      cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden;
+    }
+    .card::before { content:''; position:absolute; inset:0; background:rgba(0,255,136,0.03); opacity:0; transition:opacity 0.2s; }
+    .card:hover::before { opacity:1; }
+    .card:hover { border-color:#2a5a2a; }
+    .card-icon { font-size:22px; margin-bottom:10px; }
+    .card-title { font-family:var(--title); font-size:14px; font-weight:600; color:var(--green); letter-spacing:1px; }
+    .card-desc { font-size:10px; color:#446644; margin-top:4px; line-height:1.4; }
+    .card-badge { display:inline-block; margin-top:8px; padding:2px 8px; border:1px solid #1a3a1a; font-size:8px; letter-spacing:2px; color:#2a5a2a; }
+
+    /* FOOTER */
+    .footer { position:relative; z-index:10; padding:14px 20px; border-top:1px solid #0d1f0d; display:flex; justify-content:space-between; font-size:9px; color:#1a3a1a; letter-spacing:1px; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); margin-right:5px; animation:pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .fade { animation:fadeIn 0.7s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+  </style>
+</head>
+<body class="fade">
+
+  <div class="header">
+    <div class="header-logo">SCP RP FR</div>
+    <div class="header-right">
+      <div class="pseudo-badge" id="header-pseudo">—</div>
+      <button class="btn-logout" onclick="logout()">⏻ Déco</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-logo">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" stroke="#00ff88" stroke-width="1.5" opacity="0.4"/>
+        <circle cx="50" cy="50" r="35" stroke="#00ff88" stroke-width="1" opacity="0.3"/>
+        <circle cx="50" cy="50" r="8" fill="#00ff88" opacity="0.8"/>
+        <line x1="50" y1="5" x2="50" y2="42" stroke="#00ff88" stroke-width="1.5"/>
+        <line x1="50" y1="58" x2="50" y2="95" stroke="#00ff88" stroke-width="1.5"/>
+        <line x1="5" y1="50" x2="42" y2="50" stroke="#00ff88" stroke-width="1.5"/>
+        <line x1="58" y1="50" x2="95" y2="50" stroke="#00ff88" stroke-width="1.5"/>
+        <circle cx="50" cy="5" r="3" fill="#00ff88"/> <circle cx="50" cy="95" r="3" fill="#00ff88"/>
+        <circle cx="5" cy="50" r="3" fill="#00ff88"/> <circle cx="95" cy="50" r="3" fill="#00ff88"/>
+        <polygon points="50,20 56,32 44,32" fill="#00ff88" opacity="0.6"/>
+        <polygon points="50,80 56,68 44,68" fill="#00ff88" opacity="0.6"/>
+        <polygon points="20,50 32,44 32,56" fill="#00ff88" opacity="0.6"/>
+        <polygon points="80,50 68,44 68,56" fill="#00ff88" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="hero-title">SCP RP FR</div>
+    <div class="hero-sub">Secure · Contain · Protect</div>
+    <div class="hero-welcome">Bienvenue, <span id="welcome-pseudo">Agent</span></div>
+  </div>
+
+  <div class="alert">
+    ⚠ RAPPEL : Toute information de niveau 3 et supérieur est strictement confidentielle. Toute divulgation sera sanctionnée.
+  </div>
+
+  <div class="section">
+    <div class="section-title">Accès rapide</div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Règlement</div>
+        <div class="card-desc">Consulter les règles du serveur</div>
+        <div class="card-badge">DISPONIBLE</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎭</div>
+        <div class="card-title">Rôles</div>
+        <div class="card-desc">Voir les factions disponibles</div>
+        <div class="card-badge">DISPONIBLE</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <div class="card-title">Dossiers SCP</div>
+        <div class="card-desc">Accéder aux fiches SCP</div>
+        <div class="card-badge">NIVEAU 2+</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Mon Profil</div>
+        <div class="card-desc">Gérer ton compte agent</div>
+        <div class="card-badge">PERSONNEL</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span><span class="dot"></span>SYSTÈME EN LIGNE</span>
+    <span id="clock">--:--:--</span>
+    <span>SCP RP FR © 2026</span>
+  </div>
+
+<script>
+  const userData = localStorage.getItem('scp_user');
+  if (!userData) { window.location.href = 'index.html'; }
+  else {
+    const user = JSON.parse(userData);
+    document.getElementById('welcome-pseudo').textContent = user.pseudo;
+    document.getElementById('header-pseudo').textContent = user.pseudo.toUpperCase();
+  }
+
+  function logout() {
+    localStorage.removeItem('scp_user');
+    window.location.href = 'index.html';
+  }
+
+  setInterval(() => {
+    document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
+  }, 1000);
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
+</script>
+</body>
+</html>
