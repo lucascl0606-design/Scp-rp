@@ -157,6 +157,144 @@
 </div>
 
 <script>
+  const JSONBIN_API_KEY = "$2a$10$z37BcpPizhH149CbjRgPeu9GNDl9JUhPVSlVZmqnr3bPbUCBNRjHC";
+  const BIN_ID = "69c61e82aa77b81da92483dc";
+  const API = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+  async function getUsers() {
+    const res = await fetch(API + "/latest", { headers: { "X-Access-Key": JSONBIN_API_KEY } });
+    const data = await res.json();
+    return data.record.users || [];
+  }
+
+  async function saveUsers(users) {
+    await fetch(API, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-Access-Key": JSONBIN_API_KEY },
+      body: JSON.stringify({ users })
+    });
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+    document.getElementById(tab + '-form').classList.add('active');
+    el.classList.add('active');
+  }
+
+  async function loginUser() {
+    const pseudo = document.getElementById('login-pseudo').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const btn = document.getElementById('btn-login');
+    const msg = document.getElementById('login-msg');
+    msg.className = 'msg';
+
+    if (!pseudo || !pass) { msg.className='msg error'; msg.textContent='⚠ Remplis tous les champs.'; return; }
+
+    btn.classList.add('loading'); btn.textContent = '⟳ Vérification...';
+    try {
+      const users = await getUsers();
+      const user = users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase() && u.password === pass);
+      if (!user) {
+        btn.classList.remove('loading'); btn.innerHTML='▶ Connexion<span class="blink">_</span>';
+        msg.className='msg error'; msg.textContent='⚠ Pseudo ou mot de passe incorrect.'; return;
+      }
+      localStorage.setItem('scp_user', JSON.stringify({ pseudo: user.pseudo }));
+      msg.className='msg success'; msg.textContent='✓ Accès accordé. Redirection...';
+      setTimeout(() => window.location.href = 'accueil.html', 1200);
+    } catch(e) {
+      btn.classList.remove('loading'); btn.innerHTML='▶ Connexion<span class="blink">_</span>';
+      msg.className='msg error'; msg.textContent='⚠ Erreur de connexion au serveur.';
+    }
+  }
+
+  async function registerUser() {
+    const pseudo = document.getElementById('reg-pseudo').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+    const pass2 = document.getElementById('reg-pass2').value;
+    const btn = document.getElementById('btn-register');
+    const msg = document.getElementById('register-msg');
+    msg.className = 'msg';
+
+    if (!pseudo || !pass || !pass2) { msg.className='msg error'; msg.textContent='⚠ Remplis tous les champs.'; return; }
+    if (pass !== pass2) { msg.className='msg error'; msg.textContent='⚠ Les mots de passe ne correspondent pas.'; return; }
+    if (pass.length < 6) { msg.className='msg error'; msg.textContent='⚠ Mot de passe trop court (min. 6 caractères).'; return; }
+
+    btn.classList.add('loading'); btn.textContent = '⟳ Création...';
+    try {
+      const users = await getUsers();
+      if (users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase())) {
+        btn.classList.remove('loading'); btn.innerHTML='▶ Créer le compte<span class="blink">_</span>';
+        msg.className='msg error'; msg.textContent='⚠ Ce pseudo est déjà pris.'; return;
+      }
+      users.push({ pseudo, password: pass, createdAt: new Date().toISOString() });
+      await saveUsers(users);
+      localStorage.setItem('scp_user', JSON.stringify({ pseudo }));
+      msg.className='msg success'; msg.textContent='✓ Compte créé ! Redirection...';
+      setTimeout(() => window.location.href = 'accueil.html', 1200);
+    } catch(e) {
+      btn.classList.remove('loading'); btn.innerHTML='▶ Créer le compte<span class="blink">_</span>';
+      msg.className='msg error'; msg.textContent='⚠ Erreur de connexion au serveur.';
+    }
+  }
+
+  if (localStorage.getItem('scp_user')) window.location.href = 'accueil.html';
+</script>
+</body>
+</html>
+    <div class="logo-sub">Serveur Roleplay Français</div>
+  </div>
+
+  <div class="card">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login',this)">Connexion</button>
+      <button class="tab" onclick="switchTab('register',this)">Inscription</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-section active" id="login-form">
+      <div class="field">
+        <label>Pseudo</label>
+        <input type="text" id="login-pseudo" placeholder="Ton pseudo..." autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginUser()"/>
+      </div>
+      <button class="btn" onclick="loginUser()" id="btn-login">▶ Connexion<span class="blink">_</span></button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-section" id="register-form">
+      <div class="field">
+        <label>Pseudo</label>
+        <input type="text" id="reg-pseudo" placeholder="Choisis un pseudo..." autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Mot de passe (min. 6 caractères)</label>
+        <input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password"/>
+      </div>
+      <div class="field">
+        <label>Confirmer le mot de passe</label>
+        <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter') registerUser()"/>
+      </div>
+      <button class="btn" onclick="registerUser()" id="btn-register">▶ Créer le compte<span class="blink">_</span></button>
+      <div class="msg" id="register-msg"></div>
+    </div>
+
+    <div class="status-bar">
+      <span><span class="sdot"></span>EN LIGNE</span>
+      <span>SCP RP FR</span>
+      <span>SESSION LOCALE</span>
+    </div>
+  </div>
+</div>
+
+<script>
   const JSONBIN_API_KEY = "$2a$10$UDRWmFE/kz0dlAQUcRtv9e.96fGv9Pr7uYV4nQAWUeAtuWnmbhgpy";
   const BIN_ID = "69c5a2d6aa77b81da922ba22";
   const API = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
