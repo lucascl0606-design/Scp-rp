@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>SCP RP FR — Accès</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #00ff88; --green-dim: #00cc66; --red: #ff3344;
+      --bg: #050a05; --bg2: #0a110a; --border: #1a3a1a; --text: #c8e6c8;
+      --mono: 'Share Tech Mono', monospace; --title: 'Rajdhani', sans-serif;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { height:100%; overflow:hidden; }
+    body {
+      height:100%; width:100%;
+      background:var(--bg); color:var(--text); font-family:var(--mono);
+      overflow-y:auto; overflow-x:hidden;
+      position:relative;
+    }
+    .scanlines {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      pointer-events:none; z-index:50;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.012) 2px,rgba(0,255,136,0.012) 4px);
+    }
+    .grid-bg {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      pointer-events:none; z-index:0;
+      background-image:linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px);
+      background-size:40px 40px;
+    }
+    .page {
+      position:relative; z-index:10;
+      min-height:100vh;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:24px 16px;
+    }
+    .logo-block { text-align:center; margin-bottom:24px; width:100%; }
+    .scp-logo { width:65px; height:65px; margin:0 auto 12px; }
+    .scp-logo svg { width:100%; height:100%; filter:drop-shadow(0 0 12px var(--green)); animation:spin 20s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    .logo-title { font-family:var(--title); font-size:22px; font-weight:700; letter-spacing:6px; color:var(--green); text-shadow:0 0 20px rgba(0,255,136,0.5); }
+    .logo-sub { font-size:10px; letter-spacing:3px; color:#446644; margin-top:4px; }
+
+    .card {
+      background:rgba(10,17,10,0.97); border:1px solid var(--border);
+      border-top:2px solid var(--green-dim); padding:24px 18px;
+      position:relative; width:100%; max-width:380px;
+    }
+    .card::before {
+      content:'ACCÈS SÉCURISÉ'; position:absolute; top:-10px; left:14px;
+      background:#0a110a; padding:0 8px; font-size:9px; letter-spacing:2px;
+      color:var(--green-dim); border:1px solid var(--border);
+    }
+    .corner { position:absolute; width:10px; height:10px; border-color:var(--green-dim); border-style:solid; opacity:0.4; }
+    .corner.tl{top:5px;left:5px;border-width:1px 0 0 1px;}
+    .corner.tr{top:5px;right:5px;border-width:1px 1px 0 0;}
+    .corner.bl{bottom:5px;left:5px;border-width:0 0 1px 1px;}
+    .corner.br{bottom:5px;right:5px;border-width:0 1px 1px 0;}
+
+    .tabs { display:flex; margin-bottom:20px; border-bottom:1px solid var(--border); }
+    .tab { flex:1; padding:9px 6px; background:none; border:none; color:#446644; font-family:var(--mono); font-size:11px; letter-spacing:2px; cursor:pointer; text-transform:uppercase; transition:all 0.2s; position:relative; }
+    .tab.active { color:var(--green); }
+    .tab.active::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--green); box-shadow:0 0 8px var(--green); }
+
+    .form-section { display:none; } .form-section.active { display:block; }
+    .field { margin-bottom:14px; }
+    label { display:block; font-size:9px; letter-spacing:2px; color:#557755; margin-bottom:6px; text-transform:uppercase; }
+    input {
+      width:100%; background:rgba(0,255,136,0.03); border:1px solid #1a3a1a;
+      border-bottom:1px solid #2a5a2a; color:var(--green); font-family:var(--mono);
+      font-size:14px; padding:11px 12px; outline:none; transition:all 0.2s;
+      -webkit-appearance:none; border-radius:0; display:block;
+    }
+    input:focus { border-color:var(--green-dim); background:rgba(0,255,136,0.06); }
+    input::placeholder { color:#2a4a2a; }
+
+    .btn {
+      width:100%; padding:13px; background:transparent; border:1px solid var(--green-dim);
+      color:var(--green); font-family:var(--mono); font-size:12px; letter-spacing:3px;
+      text-transform:uppercase; cursor:pointer; transition:all 0.2s;
+      margin-top:6px; -webkit-appearance:none; border-radius:0; display:block;
+    }
+    .btn:hover { border-color:var(--green); background:rgba(0,255,136,0.06); }
+    .btn.loading { color:#446644; pointer-events:none; }
+
+    .msg { margin-top:12px; padding:9px 12px; font-size:11px; display:none; border-left:2px solid; }
+    .msg.error { display:block; border-color:var(--red); color:var(--red); background:rgba(255,51,68,0.05); }
+    .msg.success { display:block; border-color:var(--green); color:var(--green); background:rgba(0,255,136,0.05); }
+
+    .blink { animation:blink 1s step-end infinite; }
+    @keyframes blink { 50%{opacity:0;} }
+
+    .status-bar { display:flex; justify-content:space-between; margin-top:14px; padding-top:10px; border-top:1px solid #0d1f0d; font-size:9px; color:#1a3a1a; letter-spacing:1px; }
+    .sdot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--green); margin-right:4px; animation:pulse 2s ease-in-out infinite; vertical-align:middle; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .fade { animation:fadeIn 0.6s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="grid-bg"></div>
+
+  <div class="page fade">
+    <div class="logo-block">
+      <div class="scp-logo">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" stroke="#00ff88" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="50" cy="50" r="35" stroke="#00ff88" stroke-width="1" opacity="0.3"/>
+          <circle cx="50" cy="50" r="8" fill="#00ff88" opacity="0.8"/>
+          <line x1="50" y1="5" x2="50" y2="42" stroke="#00ff88" stroke-width="1.5"/>
+          <line x1="50" y1="58" x2="50" y2="95" stroke="#00ff88" stroke-width="1.5"/>
+          <line x1="5" y1="50" x2="42" y2="50" stroke="#00ff88" stroke-width="1.5"/>
+          <line x1="58" y1="50" x2="95" y2="50" stroke="#00ff88" stroke-width="1.5"/>
+          <circle cx="50" cy="5" r="3" fill="#00ff88"/>
+          <circle cx="50" cy="95" r="3" fill="#00ff88"/>
+          <circle cx="5" cy="50" r="3" fill="#00ff88"/>
+          <circle cx="95" cy="50" r="3" fill="#00ff88"/>
+          <polygon points="50,20 56,32 44,32" fill="#00ff88" opacity="0.6"/>
+          <polygon points="50,80 56,68 44,68" fill="#00ff88" opacity="0.6"/>
+          <polygon points="20,50 32,44 32,56" fill="#00ff88" opacity="0.6"/>
+          <polygon points="80,50 68,44 68,56" fill="#00ff88" opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="logo-title">SCP RP FR</div>
+      <div class="logo-sub">Serveur Roleplay Français</div>
+    </div>
+
+    <div class="card">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login',this)">Connexion</button>
+        <button class="tab" onclick="switchTab('register',this)">Inscription</button>
+      </div>
+
+      <div class="form-section active" id="login-form">
+        <div class="field">
+          <label>Pseudo</label>
+          <input type="text" id="login-pseudo" placeholder="Ton pseudo..." autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Mot de passe</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginUser()"/>
+        </div>
+        <button class="btn" onclick="loginUser()" id="btn-login">▶ Connexion<span class="blink">_</span></button>
+        <div class="msg" id="login-msg"></div>
+      </div>
+
+      <div class="form-section" id="register-form">
+        <div class="field">
+          <label>Pseudo</label>
+          <input type="text" id="reg-pseudo" placeholder="Choisis un pseudo..." autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Mot de passe (min. 6 caractères)</label>
+          <input type="password" id="reg-pass" placeholder="••••••••" autocomplete="new-password"/>
+        </div>
+        <div class="field">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter') registerUser()"/>
+        </div>
+        <button class="btn" onclick="registerUser()" id="btn-register">▶ Créer le compte<span class="blink">_</span></button>
+        <div class="msg" id="register-msg"></div>
+      </div>
+
+      <div class="status-bar">
+        <span><span class="sdot"></span>EN LIGNE</span>
+        <span>SCP RP FR</span>
+        <span>SÉCURISÉ</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const JSONBIN_API_KEY = "$2a$10$z37BcpPizhH149CbjRgPeu9GNDl9JUhPVSlVZmqnr3bPbUCBNRjHC";
+    const BIN_ID = "69c61e82aa77b81da92483dc";
+    const API = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+    if (localStorage.getItem('scp_user')) window.location.href = 'accueil.html';
+
+    async function getUsers() {
+      const res = await fetch(API + "/latest", { headers: { "X-Access-Key": JSONBIN_API_KEY } });
+      const data = await res.json();
+      return data.record.users || [];
+    }
+
+    async function saveUsers(users) {
+      await fetch(API, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Access-Key": JSONBIN_API_KEY },
+        body: JSON.stringify({ users })
+      });
+    }
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+      document.getElementById(tab + '-form').classList.add('active');
+      el.classList.add('active');
+    }
+
+    async function loginUser() {
+      const pseudo = document.getElementById('login-pseudo').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const btn = document.getElementById('btn-login');
+      const msg = document.getElementById('login-msg');
+      msg.className = 'msg';
+      if (!pseudo || !pass) { msg.className='msg error'; msg.textContent='⚠ Remplis tous les champs.'; return; }
+      btn.classList.add('loading'); btn.textContent = '⟳ Vérification...';
+      try {
+        const users = await getUsers();
+        const user = users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase() && u.password === pass);
+        if (!user) {
+          btn.classList.remove('loading'); btn.innerHTML='▶ Connexion<span class="blink">_</span>';
+          msg.className='msg error'; msg.textContent='⚠ Pseudo ou mot de passe incorrect.'; return;
+        }
+        if (user.banned) {
+          btn.classList.remove('loading'); btn.innerHTML='▶ Connexion<span class="blink">_</span>';
+          msg.className='msg error'; msg.textContent='⛔ Tu as été banni du serveur.'; return;
+        }
+        localStorage.setItem('scp_user', JSON.stringify({ pseudo: user.pseudo }));
+        msg.className='msg success'; msg.textContent='✓ Accès accordé. Redirection...';
+        setTimeout(() => window.location.href = 'accueil.html', 1200);
+      } catch(e) {
+        btn.classList.remove('loading'); btn.innerHTML='▶ Connexion<span class="blink">_</span>';
+        msg.className='msg error'; msg.textContent='⚠ Erreur de connexion au serveur.';
+      }
+    }
+
+    async function registerUser() {
+      const pseudo = document.getElementById('reg-pseudo').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      const pass2 = document.getElementById('reg-pass2').value;
+      const btn = document.getElementById('btn-register');
+      const msg = document.getElementById('register-msg');
+      msg.className = 'msg';
+      if (!pseudo || !pass || !pass2) { msg.className='msg error'; msg.textContent='⚠ Remplis tous les champs.'; return; }
+      if (pass !== pass2) { msg.className='msg error'; msg.textContent='⚠ Les mots de passe ne correspondent pas.'; return; }
+      if (pass.length < 6) { msg.className='msg error'; msg.textContent='⚠ Mot de passe trop court (min. 6 caractères).'; return; }
+      btn.classList.add('loading'); btn.textContent = '⟳ Création...';
+      try {
+        const users = await getUsers();
+        if (users.find(u => u.pseudo.toLowerCase() === pseudo.toLowerCase())) {
+          btn.classList.remove('loading'); btn.innerHTML='▶ Créer le compte<span class="blink">_</span>';
+          msg.className='msg error'; msg.textContent='⚠ Ce pseudo est déjà pris.'; return;
+        }
+        users.push({ pseudo, password: pass, grade: 'Membre', banned: false, createdAt: new Date().toISOString() });
+        await saveUsers(users);
+        localStorage.setItem('scp_user', JSON.stringify({ pseudo }));
+        msg.className='msg success'; msg.textContent='✓ Compte créé ! Redirection...';
+        setTimeout(() => window.location.href = 'accueil.html', 1200);
+      } catch(e) {
+        btn.classList.remove('loading'); btn.innerHTML='▶ Créer le compte<span class="blink">_</span>';
+        msg.className='msg error'; msg.textContent='⚠ Erreur de connexion au serveur.';
+      }
+    }
+  </script>
+</body>
+</html>
+
