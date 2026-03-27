@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>SCP RP FR — Panel Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #00ff88; --green-dim: #00cc66; --bg: #050a05; --bg2: #0a110a;
+      --border: #1a3a1a; --text: #c8e6c8; --red: #ff3344; --orange: #ff9900;
+      --mono: 'Share Tech Mono', monospace; --title: 'Rajdhani', sans-serif;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; overflow-x:hidden; }
+    body { background:var(--bg); color:var(--text); font-family:var(--mono); min-height:100vh; position:relative; }
+    .scanlines { position:fixed; inset:0; pointer-events:none; z-index:100; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.012) 2px,rgba(0,255,136,0.012) 4px); }
+    .grid-bg { position:fixed; inset:0; pointer-events:none; z-index:0; background-image:linear-gradient(rgba(0,255,136,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.025) 1px,transparent 1px); background-size:40px 40px; }
+
+    /* LOGIN ADMIN */
+    #login-screen {
+      position:fixed; inset:0; z-index:200;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--bg);
+    }
+    .login-box { width:100%; max-width:360px; padding:16px; }
+    .login-title { font-family:var(--title); font-size:20px; font-weight:700; letter-spacing:4px; color:var(--red); text-align:center; margin-bottom:6px; }
+    .login-sub { font-size:9px; letter-spacing:2px; color:#664444; text-align:center; margin-bottom:24px; }
+    .login-box input {
+      width:100%; background:rgba(255,51,68,0.04); border:1px solid #3a1a1a;
+      border-bottom:1px solid #5a2a2a; color:var(--red); font-family:var(--mono);
+      font-size:14px; padding:12px; outline:none; margin-bottom:12px;
+      -webkit-appearance:none; border-radius:0;
+    }
+    .login-box input::placeholder { color:#3a1a1a; }
+    .login-box input:focus { border-color:var(--red); background:rgba(255,51,68,0.08); }
+    .login-btn {
+      width:100%; padding:13px; background:transparent; border:1px solid var(--red);
+      color:var(--red); font-family:var(--mono); font-size:12px; letter-spacing:3px;
+      text-transform:uppercase; cursor:pointer; -webkit-appearance:none; border-radius:0;
+    }
+    .login-btn:hover { background:rgba(255,51,68,0.08); }
+    .login-err { margin-top:10px; font-size:11px; color:var(--red); text-align:center; display:none; }
+
+    /* HEADER */
+    .header {
+      position:relative; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px; border-bottom:1px solid #3a1a1a;
+      background:rgba(20,5,5,0.9);
+    }
+    .header-logo { font-family:var(--title); font-size:16px; font-weight:700; letter-spacing:4px; color:var(--red); }
+    .header-badge { font-size:9px; letter-spacing:2px; color:#664444; margin-top:2px; }
+    .btn-back { background:transparent; border:1px solid #2a1a1a; color:#664444; font-family:var(--mono); font-size:10px; letter-spacing:1px; padding:5px 10px; cursor:pointer; }
+    .btn-back:hover { border-color:var(--green-dim); color:var(--green-dim); }
+
+    /* STATS */
+    .stats { position:relative; z-index:10; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 16px; }
+    .stat-box { background:var(--bg2); border:1px solid #2a1a1a; padding:12px 10px; text-align:center; }
+    .stat-num { font-family:var(--title); font-size:24px; font-weight:700; color:var(--red); }
+    .stat-label { font-size:8px; letter-spacing:2px; color:#664444; margin-top:3px; text-transform:uppercase; }
+
+    /* SECTION */
+    .section { position:relative; z-index:10; padding:0 16px 16px; }
+    .section-title { font-size:9px; letter-spacing:3px; color:#664444; text-transform:uppercase; margin-bottom:12px; padding:10px 0 8px; border-bottom:1px solid #1a0a0a; }
+
+    /* MEMBER LIST */
+    .member-card {
+      background:var(--bg2); border:1px solid #1a0a0a; padding:12px 14px;
+      margin-bottom:8px; position:relative;
+    }
+    .member-card.banned { border-color:#3a1a1a; opacity:0.6; }
+    .member-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    .member-pseudo { font-family:var(--title); font-size:16px; color:var(--green); letter-spacing:1px; }
+    .member-pseudo.banned { color:var(--red); text-decoration:line-through; }
+    .member-grade { font-size:9px; letter-spacing:2px; padding:2px 8px; border:1px solid; }
+    .grade-membre { color:#446644; border-color:#1a3a1a; }
+    .grade-agent { color:var(--green-dim); border-color:#2a5a2a; }
+    .grade-officier { color:var(--orange); border-color:#3a2a00; }
+    .grade-admin { color:var(--red); border-color:#3a1a1a; }
+    .grade-banni { color:#664444; border-color:#2a1a1a; }
+    .member-date { font-size:9px; color:#2a4a2a; margin-bottom:8px; }
+    .member-actions { display:flex; gap:6px; flex-wrap:wrap; }
+    .action-btn {
+      padding:5px 10px; font-family:var(--mono); font-size:9px; letter-spacing:1px;
+      text-transform:uppercase; cursor:pointer; border:1px solid; background:transparent;
+      -webkit-appearance:none; border-radius:0;
+    }
+    .btn-grade { color:var(--green-dim); border-color:#1a3a1a; }
+    .btn-grade:hover { background:rgba(0,255,136,0.06); }
+    .btn-ban { color:var(--orange); border-color:#3a2200; }
+    .btn-ban:hover { background:rgba(255,153,0,0.06); }
+    .btn-unban { color:var(--green-dim); border-color:#1a3a1a; }
+    .btn-unban:hover { background:rgba(0,255,136,0.06); }
+    .btn-delete { color:var(--red); border-color:#3a1a1a; }
+    .btn-delete:hover { background:rgba(255,51,68,0.06); }
+
+    /* GRADE SELECTOR */
+    .grade-select {
+      width:100%; background:rgba(0,255,136,0.03); border:1px solid #1a3a1a;
+      color:var(--green); font-family:var(--mono); font-size:12px; padding:8px;
+      outline:none; margin-top:6px; display:none;
+      -webkit-appearance:none; border-radius:0;
+    }
+    .grade-select.open { display:block; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      background:var(--bg2); border:1px solid var(--green-dim); color:var(--green);
+      font-family:var(--mono); font-size:11px; letter-spacing:1px; padding:10px 20px;
+      z-index:300; opacity:0; transition:opacity 0.3s; white-space:nowrap;
+    }
+    .toast.show { opacity:1; }
+
+    .empty { font-size:11px; color:#2a4a2a; text-align:center; padding:20px; letter-spacing:1px; }
+    .dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--red); margin-right:5px; animation:pulse 2s ease-in-out infinite; vertical-align:middle; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .footer { position:relative; z-index:10; padding:12px 16px; border-top:1px solid #0d050d; display:flex; justify-content:space-between; font-size:9px; color:#2a1a1a; letter-spacing:1px; }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="grid-bg"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- LOGIN ADMIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-title">⚠ ACCÈS RESTREINT</div>
+      <div class="login-sub">PANEL ADMINISTRATEUR — NIVEAU 5</div>
+      <input type="text" id="admin-pseudo" placeholder="Pseudo admin..."/>
+      <input type="password" id="admin-code" placeholder="Code secret..." onkeydown="if(event.key==='Enter') adminLogin()"/>
+      <button class="login-btn" onclick="adminLogin()">▶ Accéder au panel</button>
+      <div class="login-err" id="login-err">⚠ Accès refusé.</div>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" style="display:none">
+    <div class="header">
+      <div>
+        <div class="header-logo">PANEL ADMIN</div>
+        <div class="header-badge">SCP RP FR — ACCÈS NIVEAU 5</div>
+      </div>
+      <button class="btn-back" onclick="window.location.href='accueil.html'">← Retour</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-num" id="count-total">0</div>
+        <div class="stat-label">Membres</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="count-active">0</div>
+        <div class="stat-label">Actifs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="count-banned">0</div>
+        <div class="stat-label">Bannis</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Liste des membres</div>
+      <div id="member-list"><div class="empty">Chargement...</div></div>
+    </div>
+
+    <div class="footer">
+      <span>ADMIN PANEL v1.0</span>
+      <span id="clock">--:--:--</span>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    const JSONBIN_API_KEY = "$2a$10$z37BcpPizhH149CbjRgPeu9GNDl9JUhPVSlVZmqnr3bPbUCBNRjHC";
+    const BIN_ID = "69c61e82aa77b81da92483dc";
+    // Admin credentials
+    const ADMIN_PSEUDO = "Luluclc3";
+    const ADMIN_CODE = "Luluclc34";
+    // ============================================================
+
+    const API = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+    const GRADES = ["Membre", "Agent", "Officier", "Admin"];
+
+    function adminLogin() {
+      const pseudo = document.getElementById('admin-pseudo').value.trim();
+      const code = document.getElementById('admin-code').value;
+      if (pseudo === ADMIN_PSEUDO && code === ADMIN_CODE) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        loadMembers();
+      } else {
+        document.getElementById('login-err').style.display = 'block';
+      }
+    }
+
+    async function getUsers() {
+      const res = await fetch(API + "/latest", { headers: { "X-Access-Key": JSONBIN_API_KEY } });
+      const data = await res.json();
+      return data.record.users || [];
+    }
+
+    async function saveUsers(users) {
+      await fetch(API, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-Access-Key": JSONBIN_API_KEY },
+        body: JSON.stringify({ users })
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    async function loadMembers() {
+      const users = await getUsers();
+      const list = document.getElementById('member-list');
+      document.getElementById('count-total').textContent = users.length;
+      document.getElementById('count-active').textContent = users.filter(u => !u.banned).length;
+      document.getElementById('count-banned').textContent = users.filter(u => u.banned).length;
+
+      if (users.length === 0) { list.innerHTML = '<div class="empty">Aucun membre inscrit.</div>'; return; }
+
+      list.innerHTML = users.map((u, i) => {
+        const grade = u.grade || 'Membre';
+        const gradeClass = 'grade-' + grade.toLowerCase();
+        const banned = u.banned ? ' banned' : '';
+        const pseudoClass = u.banned ? ' banned' : '';
+        const date = u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—';
+        return `
+          <div class="member-card${banned}" id="card-${i}">
+            <div class="member-top">
+              <span class="member-pseudo${pseudoClass}">${u.pseudo}</span>
+              <span class="member-grade ${gradeClass}">${u.banned ? 'BANNI' : grade.toUpperCase()}</span>
+            </div>
+            <div class="member-date">Inscrit le ${date}</div>
+            <div class="member-actions">
+              ${!u.banned ? `<button class="action-btn btn-grade" onclick="toggleGradeSelect(${i})">Grade</button>` : ''}
+              ${!u.banned ? `<button class="action-btn btn-ban" onclick="banUser(${i})">Bannir</button>` : `<button class="action-btn btn-unban" onclick="unbanUser(${i})">Débannir</button>`}
+              <button class="action-btn btn-delete" onclick="deleteUser(${i})">Supprimer</button>
+            </div>
+            <select class="grade-select" id="sel-${i}" onchange="changeGrade(${i}, this.value)">
+              <option value="">— Choisir un grade —</option>
+              ${GRADES.map(g => `<option value="${g}" ${grade===g?'selected':''}>${g}</option>`).join('')}
+            </select>
+          </div>`;
+      }).join('');
+    }
+
+    function toggleGradeSelect(i) {
+      const sel = document.getElementById('sel-' + i);
+      sel.classList.toggle('open');
+    }
+
+    async function changeGrade(i, grade) {
+      if (!grade) return;
+      const users = await getUsers();
+      users[i].grade = grade;
+      await saveUsers(users);
+      showToast(`✓ Grade "${grade}" attribué à ${users[i].pseudo}`);
+      loadMembers();
+    }
+
+    async function banUser(i) {
+      const users = await getUsers();
+      users[i].banned = true;
+      await saveUsers(users);
+      showToast(`⚠ ${users[i].pseudo} a été banni.`);
+      loadMembers();
+    }
+
+    async function unbanUser(i) {
+      const users = await getUsers();
+      users[i].banned = false;
+      await saveUsers(users);
+      showToast(`✓ ${users[i].pseudo} a été débanni.`);
+      loadMembers();
+    }
+
+    async function deleteUser(i) {
+      const users = await getUsers();
+      const pseudo = users[i].pseudo;
+      users.splice(i, 1);
+      await saveUsers(users);
+      showToast(`🗑 ${pseudo} supprimé.`);
+      loadMembers();
+    }
+
+    setInterval(() => {
+      document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR');
+    }, 1000);
+  </script>
+</body>
+</html>
+
